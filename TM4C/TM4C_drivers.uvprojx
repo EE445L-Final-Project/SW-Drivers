@@ -423,6 +423,11 @@
               <FileType>5</FileType>
               <FilePath>..\inc\user.h</FilePath>
             </File>
+            <File>
+              <FileName>Switch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Switch.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
