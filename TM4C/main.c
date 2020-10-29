@@ -7,6 +7,8 @@ The main method for the entire system.
 
 #include "user.h"
 #include "ble_handler.h"
+#include "app_handler.h"
+#include "display_interface.h"
 
 int main(void) 
 {

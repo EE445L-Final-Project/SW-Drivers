@@ -413,6 +413,16 @@
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
             </File>
+            <File>
+              <FileName>app_handler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\app_handler.h</FilePath>
+            </File>
+            <File>
+              <FileName>display_interface.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\display_interface.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
