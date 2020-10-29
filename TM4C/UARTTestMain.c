@@ -36,7 +36,7 @@ void OutCRLF(void){
 }
 
 //debug code
-int main(void){
+int main_test(void){
   char ch;
   char string[20];  // global to assist in debugging
   uint32_t n;
@@ -68,6 +68,5 @@ int main(void){
 
     UART_OutString("InUHex: ");  n=UART_InUHex();
     UART_OutString(" OutUHex="); UART_OutUHex(n); OutCRLF();
-
   }
 }
