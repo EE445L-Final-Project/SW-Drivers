@@ -11,7 +11,7 @@ Receiver status register.
 #define BLE_HANDLER_H
 
 #include <stdbool.h>
-#include "user.h"
+#include "../inc/user.h"
 
 /** Initialize UART1 and Timer0A */
 void BLEHandler_Init(void);

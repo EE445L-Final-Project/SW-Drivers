@@ -9,7 +9,7 @@ developed alongside this system.
 #ifndef APP_HANDLER_H
 #define APP_HANDLER_H
 
-#include "user.h"
+#include "../inc/user.h"
 
 /** Initialize the code for connecting and sending data to the app. */
 void App_Init(void);

@@ -404,11 +404,6 @@
               <FilePath>.\ble_handler.h</FilePath>
             </File>
             <File>
-              <FileName>user.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\user.h</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>
@@ -422,6 +417,11 @@
               <FileName>display_interface.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\display_interface.h</FilePath>
+            </File>
+            <File>
+              <FileName>user.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\inc\user.h</FilePath>
             </File>
           </Files>
         </Group>

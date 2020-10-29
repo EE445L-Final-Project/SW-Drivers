@@ -1,0 +1,7 @@
+Current version - 1.10
+
+Ver 1.10
+- added EFR32xG22 compatibility
+
+Ver 1.00
+- initial release

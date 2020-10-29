@@ -3,7 +3,7 @@
  * Auto generated Run-Time-Environment Configuration File
  *      *** Do not modify ! ***
  *
- * Project: 'UART' 
+ * Project: 'TM4C_drivers' 
  * Target:  'UART' 
  */
 
