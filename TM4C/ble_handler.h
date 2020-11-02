@@ -3,8 +3,7 @@ Created by: Benjamin Fa, Faiyaz Mostofa, Melissa Yang, and Yongye Zhu
 EE445L Fall 2020 for McDermott, Mark 
 
 Handles the data collection and sending between the TM4C and the BGM220P
-bluetooth chip using UART1. The Handler uses Timer0A to poll the UART
-Receiver status register. 
+bluetooth chip using UART1.
 ===================================================================== */
 
 #ifndef BLE_HANDLER_H
@@ -13,7 +12,7 @@ Receiver status register.
 #include <stdbool.h>
 #include "../inc/user.h"
 
-/** Initialize UART1 and Timer0A */
+/** Initializes UART1. */
 void BLEHandler_Init(void);
 
 // Receiving data ====================================================
