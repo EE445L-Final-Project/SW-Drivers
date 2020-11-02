@@ -1,8 +1,8 @@
 // UART1int.c
 // Runs on LM4F120/TM4C123
 // Use UART1 to implement bidirectional data transfer to and from another microcontroller
-// U1Rx PB0 is RxD (input to this microcontroller)
-// U1Tx PB1 is TxD (output of this microcontroller)
+// U1Rx PC4 is RxD (input to this microcontroller)
+// U1Tx PC5 is TxD (output of this microcontroller)
 // interrupts and FIFO used for receiver, busy-wait on transmit.
 // Daniel Valvano
 // Jan 3, 2020
@@ -93,13 +93,15 @@ uint32_t UART1_InStatus(void){
 #define UART_ICR_RXIC           0x00000010  // Receive Interrupt Clear
 
 //------------UART1_Init------------
-// Initialize the UART1 for 115,200 baud rate (assuming 80 MHz clock),
+// Initialize the UART1 on PortC 115,200 baud rate (assuming 80 MHz clock),
 // 8 bit word length, no parity bits, one stop bit, FIFOs enabled
 // Input: none
 // Output: none
 void UART1_Init(void){
   SYSCTL_RCGCUART_R |= 0x02;            // activate UART1
-  SYSCTL_RCGCGPIO_R |= 0x02;            // activate port B
+  SYSCTL_RCGCGPIO_R |= 0x04;            // activate port C
+	while((SYSCTL_PRGPIO_R & 0x04) != 0x04){}; // Allow time for clock to start
+		
   RxFifo_Init();                        // initialize empty FIFO
   UART1_CTL_R &= ~UART_CTL_UARTEN;      // disable UART
   UART1_IBRD_R = 43;                    // IBRD = int(80,000,000 / (16 * 115200)) = int(43.402778)
@@ -113,11 +115,11 @@ void UART1_Init(void){
                                         // enable RX FIFO interrupts and RX time-out interrupt
   UART1_IM_R |= (UART_IM_RXIM|UART_IM_RTIM);
   UART1_CTL_R |= 0x301;                 // enable UART
-  GPIO_PORTB_AFSEL_R |= 0x03;           // enable alt funct on PB1-0
-  GPIO_PORTB_DEN_R |= 0x03;             // enable digital I/O on PB1-0
-                                        // configure PB1-0 as UART
-  GPIO_PORTB_PCTL_R = (GPIO_PORTB_PCTL_R&0xFFFFFF00)+0x00000011;
-  GPIO_PORTB_AMSEL_R &= ~0x03;          // disable analog functionality on PB
+  GPIO_PORTC_AFSEL_R |=30;           // enable alt funct on PC5-4
+  GPIO_PORTC_DEN_R |= 0x30;             // enable digital I/O on PC5-4
+                                        // configure PC5-4 as UART
+  GPIO_PORTC_PCTL_R = (GPIO_PORTC_PCTL_R&0xFF00FFFF)+0x00220000;
+  GPIO_PORTC_AMSEL_R &= ~0x30;          // disable analog functionality on PC
                                         // UART1=priority 2
   NVIC_PRI1_R = (NVIC_PRI1_R&0xFF00FFFF)|0x00400000; // bits 21-23
   NVIC_EN0_R = NVIC_EN0_INT6;           // enable interrupt 6 in NVIC

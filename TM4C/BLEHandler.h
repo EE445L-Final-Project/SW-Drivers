@@ -36,4 +36,7 @@ int BLEGet_ContactDistance(void);
 /** Send the given user profile to the BLE chip to advertise. */
 void BLESend_Profile(profile_t);
 
+/** Tell the BLE module to switch modes from broadcast to single-connection */
+void BLESwitch_Advertisement(void);
+
 #endif //	BLE_HANDLER_H
