@@ -25,55 +25,157 @@
 
 // U0Rx (VCP receive) connected to PA0
 // U0Tx (VCP transmit) connected to PA1
-
 #include <stdint.h>
 #include <stdio.h>
-#include "../inc/UART.h"
+#include <string.h>
 #include "../inc/tm4c123gh6pm.h"
+#include "../inc/CortexM.h"
+#include "../inc/FIFO.h"
+#include "../inc/UART0int.h"
 
+#define NVIC_EN0_INT5           0x00000020  // Interrupt 5 enable
 
+#define UART_FR_RXFF            0x00000040  // UART Receive FIFO Full
 #define UART_FR_TXFF            0x00000020  // UART Transmit FIFO Full
 #define UART_FR_RXFE            0x00000010  // UART Receive FIFO Empty
 #define UART_LCRH_WLEN_8        0x00000060  // 8 bit word length
 #define UART_LCRH_FEN           0x00000010  // UART Enable FIFOs
 #define UART_CTL_UARTEN         0x00000001  // UART Enable
+#define UART_IFLS_RX1_8         0x00000000  // RX FIFO >= 1/8 full
+#define UART_IFLS_TX1_8         0x00000000  // TX FIFO <= 1/8 full
+#define UART_IM_RTIM            0x00000040  // UART Receive Time-Out Interrupt
+                                            // Mask
+#define UART_IM_TXIM            0x00000020  // UART Transmit Interrupt Mask
+#define UART_IM_RXIM            0x00000010  // UART Receive Interrupt Mask
+#define UART_RIS_RTRIS          0x00000040  // UART Receive Time-Out Raw
+                                            // Interrupt Status
+#define UART_RIS_TXRIS          0x00000020  // UART Transmit Raw Interrupt
+                                            // Status
+#define UART_RIS_RXRIS          0x00000010  // UART Receive Raw Interrupt
+                                            // Status
+#define UART_ICR_RTIC           0x00000040  // Receive Time-Out Interrupt Clear
+#define UART_ICR_TXIC           0x00000020  // Transmit Interrupt Clear
+#define UART_ICR_RXIC           0x00000010  // Receive Interrupt Clear
 
-//------------UART_Init------------
-// Initialize the UART for 115,200 baud rate (assuming 80 MHz bus clock),
-// 8 bit word length, no parity bits, one stop bit, FIFOs enabled
-// Input: none
-// Output: none
+
+#define FIFOSIZE   1024       // size of the FIFOs (must be power of 2)
+#define FIFOSUCCESS 1         // return value on success
+#define FIFOFAIL    0         // return value on failure
+                              // create index implementation FIFO (see FIFO.h)
+AddIndexFifo(Rx, FIFOSIZE, char, FIFOSUCCESS, FIFOFAIL)
+AddIndexFifo(Tx, 1024, char, FIFOSUCCESS, FIFOFAIL)
+
+// Initialize UART0
+// Baud rate is 115200 bits/sec
 void UART_Init(void){
   SYSCTL_RCGCUART_R |= 0x01;            // activate UART0
   SYSCTL_RCGCGPIO_R |= 0x01;            // activate port A
+  RxFifo_Init();                        // initialize empty FIFOs
+  TxFifo_Init();
   UART0_CTL_R &= ~UART_CTL_UARTEN;      // disable UART
   UART0_IBRD_R = 43;                    // IBRD = int(80,000,000 / (16 * 115,200)) = int(43.403)
   UART0_FBRD_R = 26;                    // FBRD = round(0.4028 * 64 ) = 26
                                         // 8 bit word length (no parity bits, one stop bit, FIFOs)
   UART0_LCRH_R = (UART_LCRH_WLEN_8|UART_LCRH_FEN);
-  UART0_CTL_R |= UART_CTL_UARTEN;       // enable UART
+  UART0_IFLS_R &= ~0x3F;                // clear TX and RX interrupt FIFO level fields
+                                        // configure interrupt for TX FIFO <= 1/8 full
+                                        // configure interrupt for RX FIFO >= 1/8 full
+  UART0_IFLS_R += (UART_IFLS_TX1_8|UART_IFLS_RX1_8);
+                                        // enable TX and RX FIFO interrupts and RX time-out interrupt
+  UART0_IM_R |= (UART_IM_RXIM|UART_IM_TXIM|UART_IM_RTIM);
+  UART0_CTL_R |= 0x301;                 // enable UART
   GPIO_PORTA_AFSEL_R |= 0x03;           // enable alt funct on PA1-0
   GPIO_PORTA_DEN_R |= 0x03;             // enable digital I/O on PA1-0
                                         // configure PA1-0 as UART
   GPIO_PORTA_PCTL_R = (GPIO_PORTA_PCTL_R&0xFFFFFF00)+0x00000011;
-  GPIO_PORTA_AMSEL_R &= ~0x03;          // disable analog functionality on PA
+  GPIO_PORTA_AMSEL_R = 0;               // disable analog functionality on PA
+                                        // UART0=priority 2
+  NVIC_PRI1_R = (NVIC_PRI1_R&0xFFFF00FF)|0x00004000; // bits 13-15
+  NVIC_EN0_R = NVIC_EN0_INT5;           // enable interrupt 5 in NVIC
+}
+// copy from hardware RX FIFO to software RX FIFO
+// stop when hardware RX FIFO is empty or software RX FIFO is full
+void static copyHardwareToSoftware(void){
+  char letter;
+  while(((UART0_FR_R&UART_FR_RXFE) == 0) && (RxFifo_Size() < (FIFOSIZE - 1))){
+    letter = UART0_DR_R;
+    RxFifo_Put(letter);
+  }
+}
+// copy from software TX FIFO to hardware TX FIFO
+// stop when software TX FIFO is empty or hardware TX FIFO is full
+void static copySoftwareToHardware(void){
+  char letter;
+  while(((UART0_FR_R&UART_FR_TXFF) == 0) && (TxFifo_Size() > 0)){
+    TxFifo_Get(&letter);
+    UART0_DR_R = letter;
+  }
+}
+// input ASCII character from UART
+// spin if RxFifo is empty
+char UART_InChar(void){
+  char letter;
+  while(RxFifo_Get(&letter) == FIFOFAIL){};
+  return(letter);
 }
 
-//------------UART_InChar------------
-// Wait for new serial port input
-// Input: none
-// Output: ASCII code for key typed
-char UART_InChar(void){
-  while((UART0_FR_R&UART_FR_RXFE) != 0);
-  return((char)(UART0_DR_R&0xFF));
+//------------UART_InCharNonBlock------------
+// input ASCII character from UART
+// output: 0 if RxFifo is empty
+//         character if
+char UART_InCharNonBlock(void){
+  char letter;
+  if(RxFifo_Get(&letter) == FIFOFAIL){
+    return 0;  // empty
+  };
+  return(letter);
 }
+
 //------------UART_OutChar------------
 // Output 8-bit to serial port
 // Input: letter is an 8-bit ASCII character to be transferred
 // Output: none
+// spin if TxFifo full
 void UART_OutChar(char data){
-  while((UART0_FR_R&UART_FR_TXFF) != 0);
-  UART0_DR_R = data;
+  while(TxFifo_Put(data) == FIFOFAIL){};
+  UART0_IM_R &= ~UART_IM_TXIM;          // disable TX FIFO interrupt
+  copySoftwareToHardware();
+  UART0_IM_R |= UART_IM_TXIM;           // enable TX FIFO interrupt
+}
+//------------UART_OutCharNonBlock------------
+// non blocking output ASCII character to UART
+// Input: letter is an 8-bit ASCII character to be transferred
+// Output: none
+// Error: return with lost data if TxFifo is full
+void UART_OutCharNonBlock(char data){
+  if(TxFifo_Put(data) == FIFOFAIL) return; // lost data
+  UART0_IM_R &= ~UART_IM_TXIM;          // disable TX FIFO interrupt
+  copySoftwareToHardware();
+  UART0_IM_R |= UART_IM_TXIM;           // enable TX FIFO interrupt
+}
+// at least one of three things has happened:
+// hardware TX FIFO goes from 3 to 2 or less items
+// hardware RX FIFO goes from 1 to 2 or more items
+// UART receiver has timed out
+void UART0_Handler(void){
+  if(UART0_RIS_R&UART_RIS_TXRIS){       // hardware TX FIFO <= 2 items
+    UART0_ICR_R = UART_ICR_TXIC;        // acknowledge TX FIFO
+    // copy from software TX FIFO to hardware TX FIFO
+    copySoftwareToHardware();
+    if(TxFifo_Size() == 0){             // software TX FIFO is empty
+      UART0_IM_R &= ~UART_IM_TXIM;      // disable TX FIFO interrupt
+    }
+  }
+  if(UART0_RIS_R&UART_RIS_RXRIS){       // hardware RX FIFO >= 2 items
+    UART0_ICR_R = UART_ICR_RXIC;        // acknowledge RX FIFO
+    // copy from hardware RX FIFO to software RX FIFO
+    copyHardwareToSoftware();
+  }
+  if(UART0_RIS_R&UART_RIS_RTRIS){       // receiver timed out
+    UART0_ICR_R = UART_ICR_RTIC;        // acknowledge receiver time out
+    // copy from hardware RX FIFO to software RX FIFO
+    copyHardwareToSoftware();
+  }
 }
 
 //------------UART_OutString------------
@@ -133,7 +235,18 @@ void UART_OutUDec(uint32_t n){
   }
   UART_OutChar(n+'0'); /* n is between 0 and 9 */
 }
-
+//-----------------------UART_OutSDec-----------------------
+// Output a 32-bit number in signed decimal format
+// Input: 32-bit number to be transferred
+// Output: none
+// Variable format 1-10 digits with no space before or after
+void UART_OutSDec(long n){
+  if(n<0){
+    UART_OutChar('-');
+    n = -n;
+  }
+  UART_OutUDec((unsigned long)n);
+}
 //---------------------UART_InUHex----------------------------------------
 // Accepts ASCII input in unsigned hexadecimal (base 16) format
 // Input: none
@@ -197,22 +310,81 @@ void UART_OutUHex(uint32_t number){
     }
   }
 }
-//--------------------------UART_OutUHex2----------------------------
-// Output a 32-bit number in unsigned hexadecimal format
-// Input: 32-bit number to be transferred
-// Output: none
-// Fixed format 2 digits with no space before or after
-void outnibble(uint32_t n){
-    if(n < 0xA){
-   UART_OutChar(n+'0');
+
+/****************Fixed_Fix2Str***************
+ converts fixed point number to ASCII string
+ format signed 16-bit with resolution 0.01
+ range -327.67 to +327.67
+ Input: signed 16-bit integer part of fixed point number
+         -32768 means invalid fixed-point number
+ Output: null-terminated string exactly 8 characters plus null
+ Examples
+  12345 to " 123.45"  
+ -22100 to "-221.00"
+   -102 to "  -1.02" 
+     31 to "   0.31" 
+ -32768 to " ***.**"    
+ */ 
+void Fixed_Fix2Str(long const num,char *string){
+  short n;
+  if((num>99999)||(num<-99990)){
+    strcpy((char *)string," ***.**");
+    return;
   }
-  else{
-    UART_OutChar((n-0x0A)+'A');
+  if(num<0){
+    n = -num;
+    string[0] = '-';
+  } else{
+    n = num;
+    string[0] = ' ';
   }
+  if(n>9999){
+    string[1] = '0'+n/10000;
+    n = n%10000;
+    string[2] = '0'+n/1000;
+  } else{
+    if(n>999){
+      if(num<0){
+        string[0] = ' ';
+        string[1] = '-';
+      } else {
+        string[1] = ' ';
+      }
+      string[2] = '0'+n/1000;
+    } else{
+      if(num<0){
+        string[0] = ' ';
+        string[1] = ' ';
+        string[2] = '-';
+      } else {
+        string[1] = ' ';
+        string[2] = ' ';
+      }
+    }
+  }
+  n = n%1000;
+  string[3] = '0'+n/100;
+  n = n%100;
+  string[4] = '.';
+  string[5] = '0'+n/10;
+  n = n%10;
+  string[6] = '0'+n;
+  string[7] = 0;
 }
-void UART_OutUHex2(uint32_t number){
-  outnibble(number/0x10); // ms digit
-  outnibble(number%0x10); // ls digit
+//--------------------------UART_Fix2----------------------------
+// Output a 32-bit number in 0.01 fixed-point format
+// Input: 32-bit number to be transferred -99999 to +99999
+// Output: none
+// Fixed format 
+//  12345 to " 123.45"  
+// -22100 to "-221.00"
+//   -102 to "  -1.02" 
+//     31 to "   0.31" 
+// error     " ***.**"   
+void UART_Fix2(long number){
+  char message[10];
+  Fixed_Fix2Str(number,message);
+  UART_OutString(message);
 }
 
 //------------UART_InString------------
@@ -250,13 +422,9 @@ char character;
   *bufPt = 0;
 }
 
-// Print a character to UART.
+
+// this is used for printf to output to the usb uart
 int fputc(int ch, FILE *f){
-  if((ch == 10) || (ch == 13) || (ch == 27)){
-    UART_OutChar(13);
-    UART_OutChar(10);
-    return 1;
-  }
   UART_OutChar(ch);
   return 1;
 }
@@ -272,37 +440,15 @@ int ferror(FILE *f){
   return EOF;
 }
 
-// Abstraction of general output device
-// Volume 2 section 3.4.5
-
-
-// Clear display
-void Output_Clear(void){ // Clears the display
-  // not implemented on the UART
-}
-// Turn off display (low power)
-void Output_Off(void){   // Turns off the display
-  // not implemented on the UART
-}
-// Turn on display
-void Output_On(void){    // Turns on the display
-  // not implemented on the UART
-}
-// set the color for future output
-void Output_Color(uint32_t newColor){ // Set color of future output 
-  // not implemented on the UART
-}
-
-
 #ifdef __TI_COMPILER_VERSION__
-	//Code Composer Studio Code
+  //Code Composer Studio Code
 #include "file.h"
 int uart_open(const char *path, unsigned flags, int llv_fd){
   UART_Init();
   return 0;
 }
 int uart_close( int dev_fd){
-	return 0;
+  return 0;
 }
 int uart_read(int dev_fd, char *buf, unsigned count){char ch;
   ch = UART_InChar();    // receive from keyboard
@@ -311,25 +457,25 @@ int uart_read(int dev_fd, char *buf, unsigned count){char ch;
   return 1;
 }
 int uart_write(int dev_fd, const char *buf, unsigned count){ unsigned int num=count;
-	while(num){
-		UART_OutChar(*buf);
-		buf++;
-		num--;
-	}
-	return count;
+  while(num){
+    UART_OutChar(*buf);
+    buf++;
+    num--;
+  }
+  return count;
 }
 off_t uart_lseek(int dev_fd, off_t ioffset, int origin){
-	return 0;
+  return 0;
 }
 int uart_unlink(const char * path){
-	return 0;
+  return 0;
 }
 int uart_rename(const char *old_name, const char *new_name){
-	return 0;
+  return 0;
 }
 
 //------------Output_Init------------
-// Initialize the UART for 115,200 baud rate (assuming 3 MHz bus clock),
+// Initialize the UART for 115,200 baud rate (assuming 80 MHz bus clock),
 // 8 bit word length, no parity bits, one stop bit
 // Input: none
 // Output: none
@@ -346,11 +492,7 @@ void Output_Init(void){int ret_val; FILE *fptr;
 #else
 //Keil uVision Code
 //------------Output_Init------------
-// Initialize the Nokia5110
-// Input: none
-// Output: none
-//------------Output_Init------------
-// Initialize the UART for 115,200 baud rate (assuming 16 MHz bus clock),
+// Initialize the UART for 115,200 baud rate (assuming 80 MHz bus clock),
 // 8 bit word length, no parity bits, one stop bit, FIFOs enabled
 // Input: none
 // Output: none
@@ -358,5 +500,3 @@ void Output_Init(void){
   UART_Init();
 }
 #endif
-
-

@@ -1,4 +1,4 @@
-/* =======================user.h======================================
+/* =======================user.h=====================================
 Created by: Benjamin Fa, Faiyaz Mostofa, Melissa Yang, and Yongye Zhu
 EE445L Fall 2020 for McDermott, Mark 
 
