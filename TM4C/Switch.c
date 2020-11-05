@@ -25,7 +25,7 @@ static void Timer0Arm(void){
   TIMER0_CTL_R = 0x00000000;    // 1) disable TIMER0A during setup
   TIMER0_CFG_R = 0x00000000;    // 2) configure for 32-bit mode
   TIMER0_TAMR_R = 0x0000001;    // 3) 1-SHOT mode
-  TIMER0_TAILR_R = 160000;      // 4) 10ms reload value
+  TIMER0_TAILR_R = 160000*10*10;      // 4) 10ms reload value
   TIMER0_TAPR_R = 0;            // 5) bus clock resolution
   TIMER0_ICR_R = 0x00000001;    // 6) clear TIMER0A timeout flag
   TIMER0_IMR_R = 0x00000001;    // 7) arm timeout interrupt
@@ -57,7 +57,7 @@ void Switch_Init(void(*task1)(void), void(*task2)(void)){
 
 void GPIOPortF_Handler(void){
   GPIO_PORTF_IM_R &= ~0x18;     // disarm interrupt on PF4-3 
-  if((GPIO_PORTF_ICR_R & 0x10) == 0){
+  if((GPIO_PORTF_RIS_R & 0x10) == 0x10){
 		(*SW1_Event)();
   }
   else{

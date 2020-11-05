@@ -10,32 +10,34 @@ A class to manage modification of the user profile of the current device owner.
 
 #include <stdint.h>
 
-/** The definition of the user profile for the owner of the device. */
+/** User profile thru a single encounter*/
 typedef struct user_profile 
 {
-	char name[16];	// A 16 letter name
-	uint8_t id;			// An 8 bit id number
+	char profile[32];
+//	uint32_t id; // unique ID for each user that is registered on a database
+//	uint8_t month;
+//	uint8_t day;
 } 
 profile_t;
 
-/** Initialize a basic user profile with a name and an id. Must be initialized else
-you risk attempting to change data in a null profile_t. */
-void User_Init(char*, uint8_t);
+///** Initialize a basic user profile with a name and an id. Must be initialized else
+//you risk attempting to change data in a null profile_t. */
+//void User_Init(char*, uint8_t);
 
-// Getters =======================================================================
+//// Getters =======================================================================
 
-/** Returns the current user profile of the device. */
-profile_t User_Profile(void);
+///** Returns the current user profile of the device. */
+//profile_t User_Profile(void);
 
-// Setters =======================================================================
+//// Setters =======================================================================
 
-/** Assign a new profile for the device. */
-void UserSet_Profile(profile_t);
+///** Assign a new profile for the device. */
+//void UserSet_Profile(profile_t);
 
-/** Set the name of the user profile. */
-void UserSet_Name(char*);
+///** Set the name of the user profile. */
+//void UserSet_Name(char*);
 
-/** Set the id of the user profile. */
-void UserSet_Id(uint8_t);
+///** Set the id of the user profile. */
+//void UserSet_Id(uint8_t);
 
 #endif // USER_H

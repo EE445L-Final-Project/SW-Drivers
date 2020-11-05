@@ -1,8 +1,8 @@
 // UART1int.c
 // Runs on LM4F120/TM4C123
 // Use UART1 to implement bidirectional data transfer to and from another microcontroller
-// U1Rx PC4 is RxD (input to this microcontroller)
-// U1Tx PC5 is TxD (output of this microcontroller)
+// U1Rx PB0 is RxD (input to this microcontroller)
+// U1Tx PB1 is TxD (output of this microcontroller)
 // interrupts and FIFO used for receiver, busy-wait on transmit.
 // Daniel Valvano
 // Jan 3, 2020
@@ -37,12 +37,12 @@
 uint32_t RxPutI;      // should be 0 to SIZE-1
 uint32_t RxGetI;      // should be 0 to SIZE-1 
 uint32_t RxFifoLost;  // should be 0 
-uint8_t RxFIFO[FIFOSIZE];
+char RxFIFO[FIFOSIZE];
 void RxFifo_Init(void){
   RxPutI = RxGetI = 0;                      // empty
   RxFifoLost = 0; // occurs on overflow
 }
-int RxFifo_Put(uint8_t data){
+int RxFifo_Put(char data){
   if(((RxPutI+1)&(FIFOSIZE-1)) == RxGetI){
     RxFifoLost++;
     return FIFOFAIL; // fail if full  
@@ -51,7 +51,7 @@ int RxFifo_Put(uint8_t data){
   RxPutI = (RxPutI+1)&(FIFOSIZE-1);         // next place to put
   return FIFOSUCCESS;
 }
-int RxFifo_Get(uint8_t *datapt){ 
+int RxFifo_Get(char *datapt){ 
   if(RxPutI == RxGetI) return 0;            // fail if empty
   *datapt = RxFIFO[RxGetI];                 // retrieve data
   RxGetI = (RxGetI+1)&(FIFOSIZE-1);         // next place to get
@@ -93,42 +93,36 @@ uint32_t UART1_InStatus(void){
 #define UART_ICR_RXIC           0x00000010  // Receive Interrupt Clear
 
 //------------UART1_Init------------
-// Initialize the UART1 on PortC 115,200 baud rate (assuming 80 MHz clock),
+// Initialize the UART1 for 115,200 baud rate (assuming 80 MHz clock),
 // 8 bit word length, no parity bits, one stop bit, FIFOs enabled
 // Input: none
 // Output: none
 void UART1_Init(void){
-  SYSCTL_RCGCUART_R |= 0x02;            // activate UART1
-  SYSCTL_RCGCGPIO_R |= 0x04;            // activate port C
-	while((SYSCTL_PRGPIO_R & 0x04) != 0x04){}; // Allow time for clock to start
-		
-  RxFifo_Init();                        // initialize empty FIFO
-  UART1_CTL_R &= ~UART_CTL_UARTEN;      // disable UART
-  UART1_IBRD_R = 43;                    // IBRD = int(80,000,000 / (16 * 115200)) = int(43.402778)
-  UART1_FBRD_R = 26;                    // FBRD = round(0.402778 * 64) = 26
-                                        // 8 bit word length (no parity bits, one stop bit, FIFOs)
+	SYSCTL_RCGCUART_R |= 0x0002;		// activate UART1
+	SYSCTL_RCGCGPIO_R |= 0x0004;		// activate PortC
+	UART1_CTL_R &= ~0x0001;					// disable UART
+	UART1_IBRD_R = 43;							// 80MHz, was 27
+	UART1_FBRD_R = 26; 							// 80MHz, was 8
   UART1_LCRH_R = (UART_LCRH_WLEN_8|UART_LCRH_FEN);
-  UART1_IFLS_R &= ~0x3F;                // clear TX and RX interrupt FIFO level fields
-                                        // configure interrupt for TX FIFO <= 1/8 full
-                                        // configure interrupt for RX FIFO >= 1/8 full
-  UART1_IFLS_R += (UART_IFLS_TX1_8|UART_IFLS_RX1_8);
-                                        // enable RX FIFO interrupts and RX time-out interrupt
+	
+	//Init for Rx
   UART1_IM_R |= (UART_IM_RXIM|UART_IM_RTIM);
-  UART1_CTL_R |= 0x301;                 // enable UART
-  GPIO_PORTC_AFSEL_R |=30;           // enable alt funct on PC5-4
-  GPIO_PORTC_DEN_R |= 0x30;             // enable digital I/O on PC5-4
-                                        // configure PC5-4 as UART
-  GPIO_PORTC_PCTL_R = (GPIO_PORTC_PCTL_R&0xFF00FFFF)+0x00220000;
-  GPIO_PORTC_AMSEL_R &= ~0x30;          // disable analog functionality on PC
-                                        // UART1=priority 2
-  NVIC_PRI1_R = (NVIC_PRI1_R&0xFF00FFFF)|0x00400000; // bits 21-23
+  UART1_IFLS_R += (UART_IFLS_TX1_8|UART_IFLS_RX1_8);
+	NVIC_PRI1_R = (NVIC_PRI1_R&~0x70000)+0x70000;
   NVIC_EN0_R = NVIC_EN0_INT6;           // enable interrupt 6 in NVIC
-  EnableInterrupts();
+
+	
+	UART1_CTL_R = 0x0301;
+	GPIO_PORTC_AFSEL_R |= 0x30; 		//alt func 
+	GPIO_PORTC_PCTL_R |= (GPIO_PORTC_PCTL_R&0xFF00FFFF)+0x00220000;
+	GPIO_PORTC_DEN_R |= 0x30;				// digital I/O on PC5-4
+	GPIO_PORTC_AMSEL_R &= ~0x30; 		// no analog on PC5-4
+	RxFifo_Init();                        // initialize empty FIFO
 }
 // copy from hardware RX FIFO to software RX FIFO
 // stop when hardware RX FIFO is empty or software RX FIFO is full
 void static copyHardwareToSoftware(void){
-  uint8_t letter;
+  char letter;
   while(((UART1_FR_R&UART_FR_RXFE) == 0) && (UART1_InStatus() < (FIFOSIZE - 1))){
     letter = UART1_DR_R;
     RxFifo_Put(letter);
@@ -137,8 +131,8 @@ void static copyHardwareToSoftware(void){
 
 // input ASCII character from UART
 // spin if RxFifo is empty
-uint8_t UART1_InChar(void){
-  uint8_t letter;
+char UART1_InChar(void){
+  char letter;
   while(RxFifo_Get(&letter) == FIFOFAIL){};
   return(letter);
 }
@@ -146,7 +140,7 @@ uint8_t UART1_InChar(void){
 // Output 8-bit to serial port
 // Input: letter is an 8-bit ASCII character to be transferred
 // Output: none
-void UART1_OutChar(uint8_t data){
+void UART1_OutChar(char data){
   while((UART1_FR_R&UART_FR_TXFF) != 0);
   UART1_DR_R = data;
 }
@@ -170,13 +164,27 @@ void UART1_Handler(void){
 // Output String (NULL termination)
 // Input: pointer to a NULL-terminated string to be transferred
 // Output: none
-void UART1_OutString(uint8_t *pt){
+void UART1_OutString(char *pt){
   while(*pt){
     UART1_OutChar(*pt);
     pt++;
   }
 }
 
+//-----------------------UART_OutUDec-----------------------
+// Output a 32-bit number in unsigned decimal format
+// Input: 32-bit number to be transferred
+// Output: none
+// Variable format 1-10 digits with no space before or after
+void UART_OutUDec(uint32_t n){
+// This function uses recursion to convert decimal number
+//   of unspecified length as an ASCII string
+  if(n >= 10){
+    UART_OutUDec(n/10);
+    n = n%10;
+  }
+  UART1_OutChar(n+'0'); /* n is between 0 and 9 */
+}
 
 //------------UART1_FinishOutput------------
 // Wait for all transmission to finish

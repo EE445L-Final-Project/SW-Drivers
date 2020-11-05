@@ -1,0 +1,11 @@
+.\main.o: main.c
+.\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\main.o: ../inc/user.h
+.\main.o: ../inc/PLL.h
+.\main.o: ../inc/CortexM.h
+.\main.o: Switch.h
+.\main.o: BLEHandler.h
+.\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\main.o: AppHandler.h
+.\main.o: Display.h
+.\main.o: ../inc/UART1int.h
