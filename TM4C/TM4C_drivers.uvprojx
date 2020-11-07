@@ -409,11 +409,6 @@
               <FilePath>.\Switch.c</FilePath>
             </File>
             <File>
-              <FileName>AppHandler.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\AppHandler.c</FilePath>
-            </File>
-            <File>
               <FileName>BLEHandler.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\BLEHandler.c</FilePath>

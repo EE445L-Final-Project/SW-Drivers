@@ -19,20 +19,6 @@ void BLEHandler_Init(void);
 
 void BLEGet_Input(char *input);
 
-/** Returns true when new data was recieved from the BLE device. */
-//bool BLEGet_NewDataFound(void);
-
-/** Returns the name of the owner of the other device*/
-//profile_t BLEGet_Profile(void);
-
-/** Returns the amount of time this device and the friend's device were in contact. 
-This data is not recieved. It is collected by this device once a connection is established. */
-//int BLEGet_ContactTime(void);
-
-/** Return the minimum distance between this device and the friend's device. 
-This data is not recieved. It is collected by this device once a connection is established. */
-//int BLEGet_ContactDistance(void);
-
 // Sending data ======================================================
 
 /** Send the given user profile to the BLE chip to advertise. */

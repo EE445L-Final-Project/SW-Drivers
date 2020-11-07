@@ -26,6 +26,8 @@ void BLEHandler_Init(void) {
 
 static void addContact(char *newContact) {
 	strcpy(Contacts[CurContactIdx++].profile, newContact);
+	
+	/* Keep for now: may want to divide up contact info more in future iteration */
 //	char cpContact[32];
 //	strcpy(cpContact, newContact);
 //	strtok(cpContact, ":");
@@ -39,6 +41,7 @@ static void sendContacts() {
 	int i = 0;
 	char contactMsg[32];
 	for (i = 0; i < CurContactIdx; i++) {// fix for wraparound scenario
+			/* Keep for now: may want to divide up contact info more in future iteration */
 //		snprintf(contactMsg, 15, "%x:%d:%d", Contacts[i].id, Contacts[i].month, Contacts[i].day);
 //		UART1_OutString(contactMsg);
 	  int j = 0;

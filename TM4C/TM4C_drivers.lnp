@@ -3,7 +3,6 @@
 ".\pll.o"
 ".\main.o"
 ".\switch.o"
-".\apphandler.o"
 ".\blehandler.o"
 ".\display.o"
 ".\uart1int.o"
