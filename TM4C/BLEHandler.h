@@ -15,6 +15,9 @@ bluetooth chip using UART1.
 /** Initializes UART1. */
 void BLEHandler_Init(void);
 
+/** Main Event Loop */
+void BLEHandler_Main_Loop(void);
+
 // Receiving data ====================================================
 
 void BLEGet_Input(char *input);

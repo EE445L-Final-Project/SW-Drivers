@@ -14,6 +14,8 @@ The main method for the entire system.
 #include "AppHandler.h"
 #include "Display.h"
 #include "../inc/UART1int.h"
+#include "./BGLib/sl_bt_api.h"
+#include "./BGLib/sl_bt_ncp_host.h"
 
 void FakeMessage() {
 	char fakeContact[] = "ID:1234c0de:11:3";
@@ -34,12 +36,16 @@ int main(void)
 	char input[256];
 	PLL_Init(Bus80MHz);
 	Display_Init();
-	Switch_Init(&BLESwitch_Advertisement,&FakeMessage);
+	//Switch_Init(&BLESwitch_Advertisement,&FakeMessage);
 	BLEHandler_Init();
   EnableInterrupts();
+//	sl_status_t sc;
+//	sc = sl_bt_system_hello();
+//	if(sc != SL_STATUS_OK){
+//		DisplaySend_String("Connection Failed");
+//	}
 	
 	while (1) {
-		BLEGet_Input(input);
-	  DisplaySend_String(input);
+		BLEHandler_Main_Loop();
 	}
 }

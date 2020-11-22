@@ -100,6 +100,8 @@ uint32_t UART1_InStatus(void){
 void UART1_Init(void){
 	SYSCTL_RCGCUART_R |= 0x0002;		// activate UART1
 	SYSCTL_RCGCGPIO_R |= 0x0004;		// activate PortC
+	SYSCTL_RCGCGPIO_R |= 0x0020;
+	while((SYSCTL_RCGCGPIO_R & 0x24) == 0);
 	UART1_CTL_R &= ~0x0001;					// disable UART
 	UART1_IBRD_R = 43;							// 80MHz, was 27
 	UART1_FBRD_R = 26; 							// 80MHz, was 8
@@ -110,13 +112,19 @@ void UART1_Init(void){
   UART1_IFLS_R += (UART_IFLS_TX1_8|UART_IFLS_RX1_8);
 	NVIC_PRI1_R = (NVIC_PRI1_R&~0x70000)+0x70000;
   NVIC_EN0_R = NVIC_EN0_INT6;           // enable interrupt 6 in NVIC
-
 	
-	UART1_CTL_R = 0x0301;
 	GPIO_PORTC_AFSEL_R |= 0x30; 		//alt func 
 	GPIO_PORTC_PCTL_R |= (GPIO_PORTC_PCTL_R&0xFF00FFFF)+0x00220000;
 	GPIO_PORTC_DEN_R |= 0x30;				// digital I/O on PC5-4
 	GPIO_PORTC_AMSEL_R &= ~0x30; 		// no analog on PC5-4
+	
+	GPIO_PORTF_AFSEL_R |= 0x03;
+	GPIO_PORTF_PCTL_R |= (GPIO_PORTF_PCTL_R & 0xFFFFFF00) + 0x00000011;
+	GPIO_PORTF_DEN_R |= 0x03;				// digital I/O on PC5-4
+	GPIO_PORTF_AMSEL_R &= ~0x03; 		// no analog on PC5-4
+
+	
+	UART1_CTL_R = 0xC301;
 	RxFifo_Init();                        // initialize empty FIFO
 }
 // copy from hardware RX FIFO to software RX FIFO

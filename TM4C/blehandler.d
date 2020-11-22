@@ -8,3 +8,9 @@
 .\blehandler.o: ../inc/user.h
 .\blehandler.o: ../inc/UART1int.h
 .\blehandler.o: ../inc/tm4c123gh6pm.h
+.\blehandler.o: ./BGLib/sl_bt_api.h
+.\blehandler.o: ./BGLib/sl_bt_types.h
+.\blehandler.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\blehandler.o: ./BGLib/sl_status.h
+.\blehandler.o: ./BGLib/sl_bt_ncp_host.h
+.\blehandler.o: ../inc/ST7735.h

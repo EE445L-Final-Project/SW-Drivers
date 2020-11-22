@@ -1,0 +1,9 @@
+.\sl_bt_ncp_host_api.o: BGLib\sl_bt_ncp_host_api.c
+.\sl_bt_ncp_host_api.o: BGLib\sl_bt_api.h
+.\sl_bt_ncp_host_api.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\sl_bt_ncp_host_api.o: BGLib\sl_bt_types.h
+.\sl_bt_ncp_host_api.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\sl_bt_ncp_host_api.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\sl_bt_ncp_host_api.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\sl_bt_ncp_host_api.o: BGLib\sl_status.h
+.\sl_bt_ncp_host_api.o: BGLib\sli_bt_api.h

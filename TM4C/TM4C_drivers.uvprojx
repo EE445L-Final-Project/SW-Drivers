@@ -326,7 +326,7 @@
             <uThumb>0</uThumb>
             <uSurpInc>0</uSurpInc>
             <uC99>0</uC99>
-            <uGnu>0</uGnu>
+            <uGnu>1</uGnu>
             <useXO>0</useXO>
             <v6Lang>1</v6Lang>
             <v6LangP>1</v6LangP>
@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>--C99</MiscControls>
-              <Define>rvmdk PART_LM4F120H5QR</Define>
+              <Define>rvmdk PART_LM4F120H5QR BGM220PC22HNA</Define>
               <Undefine></Undefine>
               <IncludePath>..;..\..\..</IncludePath>
             </VariousControls>
@@ -427,6 +427,16 @@
               <FileName>ST7735.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\inc\ST7735.c</FilePath>
+            </File>
+            <File>
+              <FileName>sl_bt_ncp_host.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\BGLib\sl_bt_ncp_host.c</FilePath>
+            </File>
+            <File>
+              <FileName>sl_bt_ncp_host_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\BGLib\sl_bt_ncp_host_api.c</FilePath>
             </File>
           </Files>
         </Group>
