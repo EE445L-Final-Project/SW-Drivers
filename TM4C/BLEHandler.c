@@ -28,6 +28,7 @@ static int32_t uartRxPeek(void);
 profile_t Contacts[CONTACT_LIST_SIZE];
 uint16_t CurContactIdx;
 
+
 static char message[100];
 
 void BLEHandler_Init(void) {
@@ -102,17 +103,26 @@ void BLEGet_Input(char *input) {
 
 
 //****************************************//
-//        Private Function                //
+//        Private Functions               //
 //****************************************//
+
+static char* parseData(uint8array data){
+	return "";
+}
 
 //****************************************//
 //        Event Handler                   //
 //****************************************//
 static void sl_bt_on_event(sl_bt_msg_t* evt){
 	sl_status_t sc;
+	static uint8_t advertising_set_handle = 0xff;
+	
 	bd_addr address;
 	uint8_t address_type;
 	uint8_t system_id[8];
+	
+	const int8_t MIN_RSSI;
+	struct sl_bt_evt_scanner_scan_report_s report; 
 	
 	switch(SL_BT_MSG_ID(evt->header)){
 		case sl_bt_evt_system_boot_id:{
@@ -127,9 +137,43 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 			sc = sl_bt_system_get_identity_address(&address, &address_type);
 			if(sc != SL_STATUS_OK){
 				ST7735_OutString("Failed to get address");
+				break;
 			}
 			sprintf(message, "%s Address:\n %02X:%02X:%02X:%02X:%02X:%02X", address_type? "static random": "public device", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
 			ST7735_OutString(message);
+			
+			// Create an advertising set.
+      sc = sl_bt_advertiser_create_set(&advertising_set_handle);
+//      app_assert(sc == SL_STATUS_OK,
+//                 "[E: 0x%04x] Failed to create advertising set\n",
+//                 (int)sc);
+      // Set advertising interval to 100ms.
+      sc = sl_bt_advertiser_set_timing(
+        advertising_set_handle,
+        160, // min. adv. interval (milliseconds * 1.6)
+        160, // max. adv. interval (milliseconds * 1.6)
+        0,   // adv. duration
+        0);  // max. num. adv. events
+//      app_assert(sc == SL_STATUS_OK,
+//                 "[E: 0x%04x] Failed to set advertising timing\n",
+//                 (int)sc);
+      // Start general advertising and enable connections.
+      sc = sl_bt_advertiser_start(
+        advertising_set_handle,
+        advertiser_general_discoverable,
+        advertiser_connectable_scannable);
+//      app_assert(sc == SL_STATUS_OK,
+//                 "[E: 0x%04x] Failed to start advertising\n",
+//                 (int)sc);
+      break;
+			
+			// Start scanning
+			
+			sc = sl_bt_scanner_start(1, 1);
+			if(sc != SL_STATUS_OK){
+				ST7735_OutString("Scanner start not successful.");
+			}
+			
 			break;
 		}
 		case sl_bt_evt_connection_opened_id:{
@@ -140,6 +184,14 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 			ST7735_OutString("Connection Closed");
 			break;
 		}
+		case sl_bt_evt_scanner_scan_report_id:{
+			report = evt->data.evt_scanner_scan_report;
+			if (report.rssi > MIN_RSSI){
+				addContact(parseData(report.data));
+			}
+			break;
+		}
+		
 		default:
 			break;
 	}

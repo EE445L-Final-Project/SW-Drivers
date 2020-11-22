@@ -5,7 +5,7 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.31.0.0
 Copyright (C) 2020 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Yongye Zhu, The University of Texas at Austin, LIC=----
+License Information: Benjamin Fa, The University of Texas at Austin, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.31.0.0
@@ -21,13 +21,13 @@ Target DLL:      lmidk-agdi.dll V???
 Dialog DLL:      TCM.DLL V1.46.0.0
  
 <h2>Project:</h2>
-C:\Keil_v5\SW-Drivers\TM4C\TM4C_drivers.uvprojx
-Project File Date:  11/21/2020
+C:\Users\minga\EE445L\SW-Drivers\TM4C\TM4C_drivers.uvprojx
+Project File Date:  11/22/2020
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
 Build target 'TM4C_drivers'
-compiling main.c...
+compiling BLEHandler.c...
 ./BGLib/sl_bt_types.h(2811): warning:  #1-D: last line of file ends without a newline
   #endif
 ./BGLib/sl_bt_api.h(139): warning:  #1295-D: Deprecated declaration sl_bt_dfu_flash_upload_finish - give arg types
@@ -66,12 +66,18 @@ compiling main.c...
   void sl_bt_host_handle_command();
 ./BGLib/sl_bt_ncp_host.h(130): warning:  #1295-D: Deprecated declaration sl_bt_host_handle_command_noresponse - give arg types
   void sl_bt_host_handle_command_noresponse();
-main.c(36): warning:  #177-D: variable "input"  was declared but never referenced
-  	char input[256];
-main.c: 20 warnings, 0 errors
+BLEHandler.c(124): warning:  #257-D: const variable "MIN_RSSI"  requires an initializer
+  	const int8_t MIN_RSSI;
+BLEHandler.c(172): warning:  #111-D: statement is unreachable
+  			sc = sl_bt_scanner_start(1, 1);
+BLEHandler.c(122): warning:  #177-D: variable "system_id"  was declared but never referenced
+  	uint8_t system_id[8];
+BLEHandler.c(227): warning:  #223-D: function "UART1_InStatus" declared implicitly
+  	return (int32_t)UART1_InStatus();
+BLEHandler.c: 23 warnings, 0 errors
 linking...
-Program Size: Code=6376 RO-data=2204 RW-data=104 ZI-data=17992  
-".\TM4C_drivers.axf" - 0 Error(s), 20 Warning(s).
+Program Size: Code=6764 RO-data=2204 RW-data=104 ZI-data=17992  
+".\TM4C_drivers.axf" - 0 Error(s), 23 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -88,8 +94,8 @@ Package Vendor: Keil
 
 <h2>Collection of Component include folders:</h2>
   .\RTE\_TM4C_drivers
-  C:\Users\Yongye Zhu\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include
-  C:\Users\Yongye Zhu\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C123
+  C:\Users\minga\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include
+  C:\Users\minga\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C123
 
 <h2>Collection of Component Files used:</h2>
 
