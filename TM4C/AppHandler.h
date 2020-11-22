@@ -18,10 +18,10 @@ void App_Init(void);
 
 /** I have no idea how the connections to the phone are going to be handled.
 If they're using bluetooth, this class will probably merge with the ble_handler class. */
-void App_Connect(void);
-void App_Disconnect(void);
-void App_Pair(void);
-void App_Find(void);
+//void App_Connect(void);
+//void App_Disconnect(void);
+//void App_Pair(void);
+//void App_Find(void);
 
 // Send Data =========================================================
 /* With this implementation, we are letting the app log all the interactions while
@@ -31,13 +31,13 @@ These methods will only send information about the most recent friend we made. *
 /** Send information about the device owner to the app. */
 void AppSend_UserProfile(profile_t);
 
-/** Send the profile for the newest friend to the app. */
-void AppSend_FriendProfile(profile_t);
+///** Send the profile for the newest friend to the app. */
+//void AppSend_FriendProfile(profile_t);
 
-/** Send how long this device was connected with the newest friend. */
-void AppSend_FriendContactTime(int);
+///** Send how long this device was connected with the newest friend. */
+//void AppSend_FriendContactTime(int);
 
-/** Send the closest distance between this and our friend's device to the app. */
-void AppSend_FriendContactDistance(int);
+///** Send the closest distance between this and our friend's device to the app. */
+//void AppSend_FriendContactDistance(int);
 
 #endif // APP_HANDLER_H

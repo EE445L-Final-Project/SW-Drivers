@@ -14,19 +14,11 @@ static uint32_t CurX, CurY;
 
 static void moveCursor() {
 	CurX = 0;
-	if (CurY + 10 >= 160) {
+	if (CurY + 1 > 15) {
 		ST7735_FillScreen(ST7735_BLACK);
 	}
-	CurY = (CurY + 10) % 160;
+	CurY = (CurY + 1) % 16;
 	ST7735_SetCursor(CurX, CurY);
-}
-
-void Display_Init() {
-	CurX = 0;
-	CurY = 0;
-	Output_Init();
-	ST7735_SetCursor(0, 0);
-	ST7735_SetTextColor(ST7735_GREEN);
 }
 
 void DisplaySend_String(char *string) {
@@ -39,4 +31,13 @@ void DisplaySend_Integer(int number) {
 		ST7735_OutString("-");
 	ST7735_OutUDec((uint32_t)number);
 	moveCursor();
+}
+
+void Display_Init() {
+	CurX = 0;
+	CurY = 0;
+	Output_Init();
+	ST7735_SetCursor(0, 0);
+	ST7735_SetTextColor(ST7735_GREEN);
+	DisplaySend_String("UART Log:");
 }

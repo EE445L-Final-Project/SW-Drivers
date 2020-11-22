@@ -43,19 +43,26 @@ void UART1_Init(void);
 // Wait for new serial port input
 // Input: none
 // Output: ASCII code for key typed
-uint8_t UART1_InChar(void);
+char UART1_InChar(void);
 
 //------------UART1_OutChar------------
 // Output 8-bit to serial port
 // Input: letter is an 8-bit ASCII character to be transferred
 // Output: none
-void UART1_OutChar(uint8_t data);
+void UART1_OutChar(char data);
 
 //------------UART1_OutString------------
 // Output String (NULL termination)
 // Input: pointer to a NULL-terminated string to be transferred
 // Output: none
-void UART1_OutString(uint8_t *pt);
+void UART1_OutString(char *pt);
+
+//-----------------------UART_OutUDec-----------------------
+// Output a 32-bit number in unsigned decimal format
+// Input: 32-bit number to be transferred
+// Output: none
+// Variable format 1-10 digits with no space before or after
+void UART1_OutUDec(uint32_t n);
 
 //------------UART1_FinishOutput------------
 // Wait for all transmission to finish
