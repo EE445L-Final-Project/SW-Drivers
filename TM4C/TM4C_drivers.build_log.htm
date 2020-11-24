@@ -66,16 +66,18 @@ compiling BLEHandler.c...
   void sl_bt_host_handle_command();
 ./BGLib/sl_bt_ncp_host.h(130): warning:  #1295-D: Deprecated declaration sl_bt_host_handle_command_noresponse - give arg types
   void sl_bt_host_handle_command_noresponse();
-BLEHandler.c(131): warning:  #257-D: const variable "MIN_RSSI"  requires an initializer
-  	const int8_t MIN_RSSI;
-BLEHandler.c(121): warning:  #177-D: variable "system_id"  was declared but never referenced
+BLEHandler.c(148): warning:  #177-D: variable "system_id"  was declared but never referenced
   	uint8_t system_id[8];
-BLEHandler.c(244): warning:  #223-D: function "UART1_InStatus" declared implicitly
+BLEHandler.c(270): warning:  #223-D: function "UART1_InStatus" declared implicitly
   	return (int32_t)UART1_InStatus();
-BLEHandler.c: 22 warnings, 0 errors
+BLEHandler.c(65): warning:  #177-D: function "sendContacts"  was declared but never referenced
+  static void sendContacts() {
+BLEHandler.c(110): warning:  #177-D: function "existingContact"  was declared but never referenced
+  static bool existingContact(char* name){
+BLEHandler.c: 23 warnings, 0 errors
 linking...
-Program Size: Code=7144 RO-data=2236 RW-data=104 ZI-data=17992  
-".\TM4C_drivers.axf" - 0 Error(s), 22 Warning(s).
+Program Size: Code=7348 RO-data=2236 RW-data=104 ZI-data=18008  
+".\TM4C_drivers.axf" - 0 Error(s), 23 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -98,7 +100,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
