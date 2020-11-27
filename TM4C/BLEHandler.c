@@ -174,8 +174,8 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 	uint8_t system_id[8];
 	
 	static uint8_t advertising_set_handle = 0xff;
-	static const uint8_t adv_data_len = 18;
-	static const uint8_t adv_data[adv_data_len]={
+	static uint8_t adv_data_len = 17;
+	static uint8_t adv_data[31]={
 		0x02, 0x01, 0x06, // flags
 		0x05, 0xFF, 0xFF, 0x02, 0x00, 0xFF, // specific data (identifier: 0x00FF)
 		0x07, 0x08, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65 // shortened local name
@@ -276,6 +276,25 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 			switch (evt->data.evt_gatt_server_attribute_value.attribute){
 				case gattdb_fake_device_name: {
 					ST7735_OutString("Device Name Changed\n");
+					size_t value_len;
+					const size_t max_length = 15;
+					uint8_t value[16];
+					sc = sl_bt_gatt_server_read_attribute_value(gattdb_fake_device_name, 0, max_length, &value_len, value);
+					if(sc != SL_STATUS_OK){
+						ST7735_OutString("Failed to get device name\n");
+					}	
+					sc = sl_bt_gatt_server_write_attribute_value(gattdb_device_name, 0, value_len , value);
+					if(sc != SL_STATUS_OK){
+						ST7735_OutString("Failed to set attribute\n");
+					}
+					adv_data_len = 11 + value_len;
+					adv_data[9] = value_len + 1;
+					memcpy(adv_data + 11, value, value_len);					
+					sc = sl_bt_advertiser_set_data(advertising_set_handle, 0, adv_data_len, adv_data);
+					if (sc != SL_STATUS_OK){
+						ST7735_OutString("Failed to set advertising data\n");
+						break;
+					}				
 					break;
 				}
 				case gattdb_data_ready: {
