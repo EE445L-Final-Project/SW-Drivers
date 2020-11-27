@@ -16,6 +16,8 @@ The main method for the entire system.
 #include "../inc/UART1int.h"
 #include "./BGLib/sl_bt_api.h"
 #include "./BGLib/sl_bt_ncp_host.h"
+#include "../inc/ST7735.h"
+#include "Timer.h"
 
 void FakeMessage() {
 	char fakeContact[] = "ID:1234c0de:11:3";
@@ -30,6 +32,79 @@ void FakeMessage() {
 	UART1_OutString(fakeMsg);
 }
 
+extern int time;
+static int second;
+uint8_t month;
+uint8_t day;
+uint8_t year;
+
+void Timer_Task(){
+	if(second == 59){
+		second = 0;
+		if(time % 100 == 59){
+			if(time / 100 == 23){
+				time = 0;
+				switch(month){
+					case 1:
+					case 3:
+					case 5:
+					case 7:
+					case 8:
+					case 10:
+						if(day == 31){
+							day = 1;
+							month++;
+						}
+						else{
+							day++;
+						}
+						break;
+					case 2:
+						if(day == (year % 4 == 0 ? 29 : 28)){
+								day = 1;
+								month++;
+							}
+							else{
+								day++;
+							}
+						break;
+					case 4:
+					case 6:
+					case 9:
+					case 11:
+						if(day == 30){
+							day = 1;
+							month++;
+						}
+						else{
+							day++;
+						}
+						break;
+					case 12:
+						if(day == 31){
+							month = 1;
+							day = 1;
+							year = (year + 1) % 100;
+						}
+						else{
+							day++;
+						}
+						break;
+				}
+			}
+			else{
+				time = (time / 100 + 1) * 100;
+			}
+		}
+		else{
+			time += 1;
+		}
+	}
+	else{
+		second += 1;
+	}
+}
+
 int main(void) 
 {
 	DisableInterrupts();
@@ -37,6 +112,7 @@ int main(void)
 	PLL_Init(Bus80MHz);
 	Display_Init();
 	//Switch_Init(&BLESwitch_Advertisement,&FakeMessage);
+	Timer0A_Init1HzInt(&Timer_Task);
 	BLEHandler_Init();
   EnableInterrupts();
 //	sl_status_t sc;
@@ -45,7 +121,13 @@ int main(void)
 //		DisplaySend_String("Connection Failed");
 //	}
 	
+	month = 11;
+	day = 27;
+	year = 20;
+	
+	ST7735_OutString("\nHello WOrld");
 	while (1) {
-		BLEHandler_Main_Loop();
+		
+		//BLEHandler_Main_Loop();
 	}
 }

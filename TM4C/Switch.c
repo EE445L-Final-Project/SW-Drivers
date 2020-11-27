@@ -66,8 +66,8 @@ void GPIOPortF_Handler(void){
 	Timer0Arm(); // debounce
 }
 
-// Interrupt 10ms after PortF handler
-void Timer0A_Handler(void){
-  TIMER0_IMR_R = 0x00000000;    // disarm timeout interrupt
-  GPIOArm();   // start GPIO
-}
+//// Interrupt 10ms after PortF handler
+//void Timer0A_Handler(void){
+//  TIMER0_IMR_R = 0x00000000;    // disarm timeout interrupt
+//  GPIOArm();   // start GPIO
+//}

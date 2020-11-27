@@ -15,3 +15,5 @@
 .\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 .\main.o: ./BGLib/sl_status.h
 .\main.o: ./BGLib/sl_bt_ncp_host.h
+.\main.o: ../inc/ST7735.h
+.\main.o: Timer.h

@@ -438,6 +438,11 @@
               <FileType>1</FileType>
               <FilePath>.\BGLib\sl_bt_ncp_host_api.c</FilePath>
             </File>
+            <File>
+              <FileName>Timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
