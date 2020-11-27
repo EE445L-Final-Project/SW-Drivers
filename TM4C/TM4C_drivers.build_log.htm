@@ -5,7 +5,7 @@
 <h2>Tool Versions:</h2>
 IDE-Version: µVision V5.31.0.0
 Copyright (C) 2020 ARM Ltd and ARM Germany GmbH. All rights reserved.
-License Information: Benjamin Fa, The University of Texas at Austin, LIC=----
+License Information: Yongye Zhu, The University of Texas at Austin, LIC=----
  
 Tool Versions:
 Toolchain:       MDK-Lite  Version: 5.31.0.0
@@ -21,8 +21,8 @@ Target DLL:      lmidk-agdi.dll V???
 Dialog DLL:      TCM.DLL V1.46.0.0
  
 <h2>Project:</h2>
-C:\Users\minga\EE445L\SW-Drivers\TM4C\TM4C_drivers.uvprojx
-Project File Date:  11/22/2020
+C:\Keil_v5\SW-Drivers\TM4C\TM4C_drivers.uvprojx
+Project File Date:  11/21/2020
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 6 (build 750)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
@@ -66,16 +66,20 @@ compiling BLEHandler.c...
   void sl_bt_host_handle_command();
 ./BGLib/sl_bt_ncp_host.h(130): warning:  #1295-D: Deprecated declaration sl_bt_host_handle_command_noresponse - give arg types
   void sl_bt_host_handle_command_noresponse();
-BLEHandler.c(131): warning:  #257-D: const variable "MIN_RSSI"  requires an initializer
-  	const int8_t MIN_RSSI;
-BLEHandler.c(121): warning:  #177-D: variable "system_id"  was declared but never referenced
+BLEHandler.c(174): warning:  #177-D: variable "system_id"  was declared but never referenced
   	uint8_t system_id[8];
-BLEHandler.c(244): warning:  #223-D: function "UART1_InStatus" declared implicitly
+BLEHandler.c(347): warning:  #223-D: function "UART1_InStatus" declared implicitly
   	return (int32_t)UART1_InStatus();
-BLEHandler.c: 22 warnings, 0 errors
+BLEHandler.c(346): warning:  #177-D: function "uartRxPeek"  was declared but never referenced
+  static int32_t uartRxPeek(void){
+BLEHandler.c(71): warning:  #177-D: function "sendContacts"  was declared but never referenced
+  static void sendContacts() {
+BLEHandler.c(136): warning:  #177-D: function "existingContact"  was declared but never referenced
+  static bool existingContact(char* name){
+BLEHandler.c: 24 warnings, 0 errors
 linking...
-Program Size: Code=7144 RO-data=2236 RW-data=104 ZI-data=17992  
-".\TM4C_drivers.axf" - 0 Error(s), 22 Warning(s).
+Program Size: Code=7768 RO-data=2236 RW-data=228 ZI-data=18012  
+".\TM4C_drivers.axf" - 0 Error(s), 24 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -92,13 +96,13 @@ Package Vendor: Keil
 
 <h2>Collection of Component include folders:</h2>
   .\RTE\_TM4C_drivers
-  C:\Users\minga\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include
-  C:\Users\minga\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C123
+  C:\Users\Yongye Zhu\AppData\Local\Arm\Packs\ARM\CMSIS\5.7.0\CMSIS\Core\Include
+  C:\Users\Yongye Zhu\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C123
 
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>

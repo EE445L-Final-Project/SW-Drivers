@@ -17,6 +17,12 @@ BLE handler
 #include "./BGLib/sl_bt_ncp_host.h"
 #include "../inc/ST7735.h"
 
+#define gattdb_device_name 11
+#define gattdb_fake_device_name 31
+#define gattdb_data_ready 27
+#define gattdb_contact_user 21
+
+
 SL_BT_API_DEFINE();
 static void sl_bt_on_event(sl_bt_msg_t* evt);
 static void uart_tx_wrapper(uint32_t len, uint8_t* data);
@@ -33,7 +39,7 @@ uint16_t CurContactIdx;
 static char message[100];
 
 void BLEHandler_Init(void) {
-	SL_BT_API_INITIALIZE_NONBLOCK(uart_tx_wrapper, uartRx, uartRxPeek);
+	SL_BT_API_INITIALIZE(uart_tx_wrapper, uartRx);
 	UART1_Init();
 	ST7735_OutString("EE445L Final\nInitializing BLE...");
 	CurContactIdx = 0;
@@ -107,6 +113,26 @@ void BLESwitch_Advertisement() {
 //        Helper Functions                //
 //****************************************//
 
+typedef struct _user_profile{
+	uint8_t name[7];
+	uint8_t date[3];
+	uint8_t time[2];
+} user_profile_t;
+
+user_profile_t dummy_profile[10] = {
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x30}, {9,  20, 20}, {12, 20}}, 
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x31}, {10, 20, 20}, {12, 20}}, 
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x32}, {11, 20, 20}, {12, 20}}, 
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x33}, {12, 20, 20}, {12, 20}},
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x34}, {1, 20, 20}, {12, 20}},
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x35}, {2, 20, 20}, {12, 20}},
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x36}, {3, 20, 20}, {12, 20}},
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x37}, {4, 20, 20}, {12, 20}},
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x38}, {5, 20, 20}, {12, 20}},
+{{0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x39}, {6, 20, 20}, {12, 20}}
+};
+
+
 static bool existingContact(char* name){
 	for(int i = 0; i < CONTACT_LIST_SIZE; i++){
 		if(strcmp(name, Contacts[i].profile) == 0){
@@ -152,8 +178,9 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 	static const uint8_t adv_data[adv_data_len]={
 		0x02, 0x01, 0x06, // flags
 		0x05, 0xFF, 0xFF, 0x02, 0x00, 0xFF, // specific data (identifier: 0x00FF)
-		0x07, 0x08, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65, 0x01 // shortened local name
+		0x07, 0x08, 0x44, 0x65, 0x76, 0x69, 0x63, 0x65 // shortened local name
 	};
+	static int profile_index = 0;
 	 
 	
 	switch(SL_BT_MSG_ID(evt->header)){
@@ -171,20 +198,26 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 				ST7735_OutString("Failed to get address");
 				break;
 			}
-			sprintf(message, "%s Address:\n %02X:%02X:%02X:%02X:%02X:%02X", address_type? "static random": "public device", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
+			sprintf(message, "%s Address:\n %02X:%02X:%02X:%02X:%02X:%02X\n", address_type? "static random": "public device", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
 			ST7735_OutString(message);
 			
-			// Set advertising data
-			sc = sl_bt_advertiser_set_data(advertising_set_handle, 0, adv_data_len, adv_data);
-			if (sc != SL_STATUS_OK){
-				ST7735_OutString("Failed to set advertising data\n");
-				break;
+			uint8_t device_name[] = {0x44, 0x65, 0x76, 0x69, 0x63, 0x65};
+			sc = sl_bt_gatt_server_write_attribute_value(gattdb_device_name, 0, 6 , device_name);
+			if(sc != SL_STATUS_OK){
+				ST7735_OutString("Failed to set attribute\n");
 			}
-			
+				
 			// Create an advertising set.
       sc = sl_bt_advertiser_create_set(&advertising_set_handle);
 			if (sc != SL_STATUS_OK){
 				ST7735_OutString("Failed to create advertising set\n");
+				break;
+			}
+			
+		 // Set advertising data
+			sc = sl_bt_advertiser_set_data(advertising_set_handle, 0, adv_data_len, adv_data);
+			if (sc != SL_STATUS_OK){
+				ST7735_OutString("Failed to set advertising data\n");
 				break;
 			}
 			
@@ -203,29 +236,73 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
       // Start general advertising and enable connections.
       sc = sl_bt_advertiser_start(
         advertising_set_handle,
-        advertiser_general_discoverable,
+        advertiser_user_data,
         advertiser_connectable_scannable);
 			if (sc != SL_STATUS_OK){
 				ST7735_OutString("Failed to start advertising\n");
 				break;
 			}
 			
-			// Start scanning
-			sc = sl_bt_scanner_start(1, 1);
-			if(sc != SL_STATUS_OK){
-				ST7735_OutString("Failed to start scanning\n");
-			}
+//			// Start scanning
+//			sc = sl_bt_scanner_start(1, 1);
+//			if(sc != SL_STATUS_OK){
+//				ST7735_OutString("Failed to start scanning\n");
+//			}
 			
 			break;
 		}
 		case sl_bt_evt_connection_opened_id:{
-			ST7735_OutString("New Connection Opened");
+			ST7735_OutString("New Connection Opened\n");
+			profile_index = 0;
 			break;
 		}
 		case sl_bt_evt_connection_closed_id:{
-			ST7735_OutString("Connection Closed");
+			ST7735_OutString("Connection Closed\n");
+      // Start general advertising and enable connections.
+      sc = sl_bt_advertiser_start(
+        advertising_set_handle,
+        advertiser_user_data,
+        advertiser_connectable_scannable);
+			if (sc != SL_STATUS_OK){
+				ST7735_OutString("Failed to start advertising\n");
+				break;
+			}
 			break;
 		}
+		
+		case sl_bt_evt_gatt_server_attribute_value_id:{
+			switch (evt->data.evt_gatt_server_attribute_value.attribute){
+				case gattdb_fake_device_name: {
+					ST7735_OutString("Device Name Changed\n");
+					break;
+				}
+				case gattdb_data_ready: {
+					uint8_t ready = 1;
+					uint16_t sent_len;
+					uint8_t user_profile[12];
+					memcpy(user_profile, dummy_profile[profile_index].name, 7);
+					memcpy(user_profile + 7, dummy_profile[profile_index].date, 3);
+					memcpy(user_profile + 10, dummy_profile[profile_index].time, 2);
+					sc = sl_bt_gatt_server_write_attribute_value(gattdb_contact_user, 0, 12, user_profile);
+					if(sc != SL_STATUS_OK){
+						ST7735_OutString("Fail to write user profile\n");	
+					}
+					if(profile_index == 10){
+						return;
+					}
+					profile_index ++;
+					sc = sl_bt_gatt_server_send_characteristic_notification(0xff, gattdb_data_ready, 1, &ready, &sent_len);
+					if(sc != SL_STATUS_OK){
+						ST7735_OutString("Fail to write user profile\n");	
+					}
+
+				}
+				default:
+					break;			
+			}
+			break;
+		}
+		
 		case sl_bt_evt_scanner_scan_report_id:{
 			report = evt->data.evt_scanner_scan_report;
 			if (validBLE(&report)){
