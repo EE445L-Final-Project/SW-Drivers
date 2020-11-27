@@ -128,6 +128,6 @@ int main(void)
 	ST7735_OutString("\nHello WOrld");
 	while (1) {
 		
-		//BLEHandler_Main_Loop();
+		BLEHandler_Main_Loop();
 	}
 }
