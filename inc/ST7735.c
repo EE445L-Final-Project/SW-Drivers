@@ -1722,6 +1722,7 @@ void ST7735_OutChar(char ch){
   if((ch == 10) || (ch == 13) || (ch == 27)){
     StY++; StX=0;
     if(StY>15){
+			ST7735_FillScreen(ST7735_BLACK);
       StY = 0;
     }
     ST7735_DrawString(0,StY,"                     ",StTextColor);

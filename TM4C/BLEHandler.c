@@ -44,7 +44,7 @@ void BLEHandler_Init(void) {
 	ST7735_OutString("EE445L Final\nInitializing BLE...");
 	CurContactIdx = 0;
 	
-	//sl_bt_system_reset(0);
+	sl_bt_system_reset(0);
 }
 
 void BLEHandler_Main_Loop(void){
@@ -244,13 +244,15 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 				ST7735_OutString("Failed to start advertising\n");
 				break;
 			}
-			
+				
 //			// Start scanning
 //			sc = sl_bt_scanner_start(1, 1);
 //			if(sc != SL_STATUS_OK){
 //				ST7735_OutString("Failed to start scanning\n");
 //			}
-			
+			ST7735_OutString("BLE Successfully inisialized...\n");
+			for(int i = 0; i < 99999999; i++);
+			ST7735_FillScreen(ST7735_BLACK);	
 			break;
 		}
 		case sl_bt_evt_connection_opened_id:{
@@ -316,7 +318,6 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 					if(sc != SL_STATUS_OK){
 						ST7735_OutString("Fail to write user profile\n");	
 					}
-
 				}
 				default:
 					break;			

@@ -112,10 +112,10 @@ BGLib\sl_bt_ncp_host.h(130): warning:  #1295-D: Deprecated declaration sl_bt_hos
 BGLib\sl_bt_ncp_host.c(109): warning:  #1293-D: assignment in condition
       if ( (p = sl_bt_wait_message()) ) {
 BGLib\sl_bt_ncp_host.c: 20 warnings, 0 errors
-compiling UART1int.c...
 compiling PLL.c...
 compiling Switch.c...
 compiling Display.c...
+compiling UART1int.c...
 compiling BLEHandler.c...
 ./BGLib/sl_bt_types.h(2811): warning:  #1-D: last line of file ends without a newline
   #endif
@@ -157,9 +157,9 @@ compiling BLEHandler.c...
   void sl_bt_host_handle_command_noresponse();
 BLEHandler.c(174): warning:  #177-D: variable "system_id"  was declared but never referenced
   	uint8_t system_id[8];
-BLEHandler.c(368): warning:  #223-D: function "UART1_InStatus" declared implicitly
+BLEHandler.c(369): warning:  #223-D: function "UART1_InStatus" declared implicitly
   	return (int32_t)UART1_InStatus();
-BLEHandler.c(367): warning:  #177-D: function "uartRxPeek"  was declared but never referenced
+BLEHandler.c(368): warning:  #177-D: function "uartRxPeek"  was declared but never referenced
   static int32_t uartRxPeek(void){
 BLEHandler.c(71): warning:  #177-D: function "sendContacts"  was declared but never referenced
   static void sendContacts() {
@@ -210,7 +210,7 @@ BGLib\sl_bt_ncp_host_api.c(21): warning:  #1295-D: Deprecated declaration sl_bt_
   void sl_bt_host_handle_command_noresponse();
 BGLib\sl_bt_ncp_host_api.c: 20 warnings, 0 errors
 linking...
-Program Size: Code=7992 RO-data=2204 RW-data=260 ZI-data=18012  
+Program Size: Code=8116 RO-data=2204 RW-data=260 ZI-data=18012  
 ".\TM4C_drivers.axf" - 0 Error(s), 84 Warning(s).
 
 <h2>Software Packages used:</h2>
@@ -234,7 +234,7 @@ Package Vendor: Keil
 <h2>Collection of Component Files used:</h2>
 
    * Component: ARM::CMSIS:CORE:5.4.0
-Build Time Elapsed:  00:00:02
+Build Time Elapsed:  00:00:01
 </pre>
 </body>
 </html>
