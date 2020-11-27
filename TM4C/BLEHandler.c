@@ -201,6 +201,7 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 			sprintf(message, "%s Address:\n %02X:%02X:%02X:%02X:%02X:%02X\n", address_type? "static random": "public device", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
 			ST7735_OutString(message);
 			
+
 			uint8_t device_name[] = {0x44, 0x65, 0x76, 0x69, 0x63, 0x65};
 			sc = sl_bt_gatt_server_write_attribute_value(gattdb_device_name, 0, 6 , device_name);
 			if(sc != SL_STATUS_OK){
@@ -213,6 +214,7 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
 				ST7735_OutString("Failed to create advertising set\n");
 				break;
 			}
+			
 			
 		 // Set advertising data
 			sc = sl_bt_advertiser_set_data(advertising_set_handle, 0, adv_data_len, adv_data);
@@ -229,7 +231,7 @@ static void sl_bt_on_event(sl_bt_msg_t* evt){
         0,   // adv. duration
         0);  // max. num. adv. events
 			if (sc != SL_STATUS_OK){
-				ST7735_OutString("Failed to set advertising timing\n");
+				ST7735_OutString("Failed to set \nadvertising timing\n");
 				break;
 			}
 				

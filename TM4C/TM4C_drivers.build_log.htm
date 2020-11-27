@@ -66,6 +66,7 @@ compiling BLEHandler.c...
   void sl_bt_host_handle_command();
 ./BGLib/sl_bt_ncp_host.h(130): warning:  #1295-D: Deprecated declaration sl_bt_host_handle_command_noresponse - give arg types
   void sl_bt_host_handle_command_noresponse();
+<<<<<<< HEAD
 BLEHandler.c(174): warning:  #177-D: variable "system_id"  was declared but never referenced
   	uint8_t system_id[8];
 BLEHandler.c(347): warning:  #223-D: function "UART1_InStatus" declared implicitly
@@ -80,6 +81,20 @@ BLEHandler.c: 24 warnings, 0 errors
 linking...
 Program Size: Code=7768 RO-data=2236 RW-data=228 ZI-data=18012  
 ".\TM4C_drivers.axf" - 0 Error(s), 24 Warning(s).
+=======
+BLEHandler.c(148): warning:  #177-D: variable "system_id"  was declared but never referenced
+  	uint8_t system_id[8];
+BLEHandler.c(270): warning:  #223-D: function "UART1_InStatus" declared implicitly
+  	return (int32_t)UART1_InStatus();
+BLEHandler.c(65): warning:  #177-D: function "sendContacts"  was declared but never referenced
+  static void sendContacts() {
+BLEHandler.c(110): warning:  #177-D: function "existingContact"  was declared but never referenced
+  static bool existingContact(char* name){
+BLEHandler.c: 23 warnings, 0 errors
+linking...
+Program Size: Code=7348 RO-data=2236 RW-data=104 ZI-data=18008  
+".\TM4C_drivers.axf" - 0 Error(s), 23 Warning(s).
+>>>>>>> aa23552abbe88bff482582a89a9e073a51e6a0d1
 
 <h2>Software Packages used:</h2>
 
